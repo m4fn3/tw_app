@@ -1,3 +1,4 @@
 .env
 api_keys.txt
 secret.json
+/test

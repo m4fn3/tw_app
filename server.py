@@ -21,8 +21,7 @@ with open("secret.json", "r", encoding="utf-8") as f:
 
 @app.route('/')
 def index():
-    # 連携アプリ認証済みなら user の timeline を取得
-    data = get_timeline()
+    data = get_data()
 
     return render_template('index.html', data=data)
 
@@ -48,7 +47,12 @@ def logout():
     return redirect("/")
 
 
-def get_timeline():
+@app.route('/history', methods=["GET"])
+def history():
+    return ", ".join(secret.keys())
+
+
+def get_data():
     # 認証情報の確認
     flag = False
     auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
