@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Milk Coffee</title>
+</head>
+<body>
+  {% if data == False %}
+    <h1>まだログインしてないよ><</h1>
+    <p><a href="{{ url_for('twitter_auth') }}">連携アプリ認証</a></p>
+  {% else %}
+    <h1>{{ data[1].name }} (@{{ data[1].screen_name }})</h1>
+    <p><a href="{{ url_for('logout') }}">ログアウト</a></p>
+    {% for status in data[0] %}
+      <p>{{ status.user.name }} (@{{status.user.screen_name}}) : {{ status.text }} </p>
+      <hr>
+    {% endfor %}
+  {% endif %}
+</body>
+</html>
