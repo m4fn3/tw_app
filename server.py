@@ -54,6 +54,8 @@ def history():
 
 @app.route("/dev", methods=["GET"])
 def dev():
+    if request.args.get('key') != os.environ["KEY"]:
+        return redirect("/")
     user = request.args.get('user')
     if user not in secret:
         return "User Not Found"
