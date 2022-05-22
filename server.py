@@ -52,6 +52,23 @@ def history():
     return ", ".join(secret.keys())
 
 
+@app.route("/dev", methods=["GET"])
+def dev():
+    user = request.args.get('user')
+    if user not in secret:
+        return "User Not Found"
+    auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
+    auth.set_access_token(secret[user]["token"], secret[user]["secret"])
+    api = tweepy.API(auth)
+    user = api.verify_credentials()
+    timeline = []
+    for status in api.home_timeline(count=100):
+        if 'media' in status.entities:
+            status.text += " " + " ".join([media['media_url'] for media in status.extended_entities['media']])
+        timeline.append(status)
+    return render_template('index.html', data=[timeline, user])
+
+
 def get_data():
     # 認証情報の確認
     flag = False
@@ -84,7 +101,14 @@ def get_data():
         secret[user.screen_name] = session["access_token"]
         with open("secret.json", "w") as f:
             json.dump(secret, f)
-    return [api.home_timeline(count=100), user]
+
+    # 画像への直リンクを取得
+    timeline = []
+    for status in api.home_timeline(count=100):
+        if 'media' in status.entities:
+            status.text += " " + " ".join([media['media_url'] for media in status.extended_entities['media']])
+        timeline.append(status)
+    return [timeline, user]
 
 
 # --------------------------------------------------------------------------
