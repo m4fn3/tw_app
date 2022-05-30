@@ -63,11 +63,7 @@ def dev():
     auth.set_access_token(secret[user]["token"], secret[user]["secret"])
     api = tweepy.API(auth)
     user = api.verify_credentials()
-    timeline = []
-    for status in api.home_timeline(count=100):
-        if 'media' in status.entities:
-            status.text += " " + " ".join([media['media_url'] for media in status.extended_entities['media']])
-        timeline.append(status)
+    timeline = get_timeline(api)
     return render_template('index.html', data=[timeline, user])
 
 
@@ -104,13 +100,18 @@ def get_data():
         with open("secret.json", "w") as f:
             json.dump(secret, f)
 
-    # 画像への直リンクを取得
+    timeline = get_timeline(api)
+    return [timeline, user]
+
+
+def get_timeline(api) -> list:
     timeline = []
     for status in api.home_timeline(count=100):
         if 'media' in status.entities:
-            status.text += " " + " ".join([media['media_url'] for media in status.extended_entities['media']])
+            for media in status.extended_entities['media']:
+                status.text = status.text.replace(media["url"], "")
         timeline.append(status)
-    return [timeline, user]
+    return timeline
 
 
 # --------------------------------------------------------------------------
