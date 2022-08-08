@@ -63,7 +63,10 @@ def dev():
     auth.set_access_token(secret[user]["token"], secret[user]["secret"])
     api = tweepy.API(auth)
     user = api.verify_credentials()
-    timeline = get_timeline(api)
+    if (name := request.args.get('account')) is not None:
+        timeline = get_account(api, name)
+    else:
+        timeline = get_timeline(api)
     return render_template('index.html', data=[timeline, user])
 
 
@@ -107,6 +110,16 @@ def get_data():
 def get_timeline(api) -> list:
     timeline = []
     for status in api.home_timeline(count=100):
+        if 'media' in status.entities:
+            for media in status.extended_entities['media']:
+                status.text = status.text.replace(media["url"], "")
+        timeline.append(status)
+    return timeline
+
+
+def get_account(api, name) -> list:
+    timeline = []
+    for status in tweepy.Cursor(api.user_timeline, screen_name=name).items(100):
         if 'media' in status.entities:
             for media in status.extended_entities['media']:
                 status.text = status.text.replace(media["url"], "")
